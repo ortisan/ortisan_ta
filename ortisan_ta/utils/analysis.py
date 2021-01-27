@@ -39,6 +39,10 @@ def std_rolling(arr: np.ndarray):
     return np.std(arr)
 
 
+def z_score_rolling(mean):
+    return lambda arr: (np.mean(arr) - mean) / np.std(arr)
+
+
 def array_rolling(arr: np.ndarray):
     return arr.tostring()
 
@@ -145,8 +149,10 @@ def create_aroon_indicator_cols(high: pd.Series, low: pd.Series, period: int = 2
     df - Dataframe
     period - Período.
     """
-    idx_of_max = high.rolling(period, min_periods=period).apply(argmax_rolling, raw=True)
-    idx_of_min = low.rolling(period, min_periods=period).apply(argmin_rolling, raw=True)
+    idx_of_max = high.rolling(period, min_periods=period).apply(
+        argmax_rolling, raw=True)
+    idx_of_min = low.rolling(period, min_periods=period).apply(
+        argmin_rolling, raw=True)
     # Interpretação:
     #     Se o índice aroon_up cair abaixo de 50 (máxima está abaixo da mediana), a tendência perdeu força. Isso vale o mesmo para o aroon_down
     #     Se o índice aroon_up estiver acima de 70 (máxima está acima do quartil 3), a tendência está forte. Isso vale o mesmo para o aroon_down
@@ -160,7 +166,3 @@ def create_aroon_indicator_cols(high: pd.Series, low: pd.Series, period: int = 2
     #     Índice sofrerá variação de -100 a 100, caso o índice for > 0, sinaliza tendência de alta. Se o índice for < 0, tendência de baixa.
     idx_aroon = aroon_up - aroon_down
     return pd.DataFrame({"aroon_up": aroon_up, "aroon_down": aroon_down, "idx_aroon": idx_aroon})
-
-
-
-

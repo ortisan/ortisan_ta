@@ -16,6 +16,7 @@ class MarketSimulator(object):
         self.init_amount = init_amount
         self.current_amount = init_amount
         self.brokerage = brokerage
+        self.symbols_operations = {}
 
     def evaluate(self, symbol: str, price: float):
         """
@@ -42,11 +43,10 @@ class MarketSimulator(object):
 
 
 
-    def buy(self, date: datetime, symbol: str, quantity: int, price: float, stop_loss: float, stop_gain: float):
+    def buy(self, symbol: str, quantity: int, price: float, stop_loss: float, stop_gain: float):
         """
         Buy simulation
         Keyword arguments:
-        date -- Operation's date
         symbol -- Asset symbol
         quantity -- Amount
         stop_loss -- Stop loss
@@ -65,7 +65,7 @@ class MarketSimulator(object):
         else:
             print('does not have money')
 
-    def sell(self, date: datetime, symbol: str, price: float, operations: list):
+    def sell(self, symbol: str, price: float, operations: list):
         """
         Sell simulation
         Keyword arguments:
@@ -116,8 +116,7 @@ class OperationItem(object):
     stop_loss = 0.0
     stop_gain = 0.0
 
-    def __init__(self, date: datetime, quantity: int, price: float, stop_loss: float, stop_gain: float):
-        self.date = date
+    def __init__(self, quantity: int, price: float, stop_loss: float, stop_gain: float):
         self.quantity = quantity
         self.price = price
         self.stop_loss = stop_loss
