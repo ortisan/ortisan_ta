@@ -46,6 +46,12 @@ def z_score_rolling(mean):
 def array_rolling(arr: np.ndarray):
     return arr.tostring()
 
+def rolling_mean_high_over_mean_low(arr):
+    mean_low = np.mean(arr[arr < 0]) - 0.0001
+    mean_high = np.mean(arr[arr > 0]) + 0.0001
+    mean_low = mean_low * -1
+    return mean_high / mean_low
+
 
 def sma(serie: pd.Series, period: int = 10):
     return serie.rolling(period, min_periods=period).mean()
@@ -122,7 +128,23 @@ def trend_roc(serie: pd.Series, period: int = 20, threshold: float = 0.1):
     return df
 
 
-def create_obv_indicator_col(close: pd.Series, volume: pd.Series):
+def macd(close: pd.Series, period1=12, period2=26, signal_line_period=9):
+    if period1 >= period2:
+        raise Exception("Period1 must be less than period2")
+    ema_p1 = ema(close, period1)
+    ema_p2 = ema(close, period2)
+    macd = ema_p1 - ema_p2
+
+    macd_signal = ema(macd, signal_line_period)
+    macd_histogram = macd - macd_signal
+
+    buy_alert = (macd_signal.shift(1) < macd) & (macd_signal.shift(1) > macd)
+    sell_alert = (macd_signal.shift(1) < macd) & (macd_signal.shift(1) > macd)
+
+    return pd.DataFrame({"macd": macd, "signal": macd_signal, "histogram": macd_histogram, "buy_alert": buy_alert, "sell_alert": sell_alert})
+
+
+def obv(close: pd.Series, volume: pd.Series):
     """
     O OBV é um indicador de tendência.
     Se o valor de fechamento atual é maior que o fechamento anterior, OBV = OBV + VOLUME.
@@ -142,7 +164,7 @@ def create_obv_indicator_col(close: pd.Series, volume: pd.Series):
     return obv
 
 
-def create_aroon_indicator_cols(high: pd.Series, low: pd.Series, period: int = 25):
+def aroon(high: pd.Series, low: pd.Series, period: int = 25):
     """
     O sistema Aroon indica se a ação está em tendência e o quão forte ela é.
     Keyword arguments:
@@ -165,4 +187,18 @@ def create_aroon_indicator_cols(high: pd.Series, low: pd.Series, period: int = 2
     # Interpretação:
     #     Índice sofrerá variação de -100 a 100, caso o índice for > 0, sinaliza tendência de alta. Se o índice for < 0, tendência de baixa.
     idx_aroon = aroon_up - aroon_down
-    return pd.DataFrame({"aroon_up": aroon_up, "aroon_down": aroon_down, "idx_aroon": idx_aroon})
+    return pd.DataFrame({"up": aroon_up, "down": aroon_down, "idx": idx_aroon})
+
+
+def rsi(close, period=10):
+    diff = close.diff(1)
+    up_direction = diff.where(diff > 0, 0.0)
+    down_direction = -diff.where(diff < 0, 0.0)
+    emaup = ema(up_direction, period=period)
+    emadn = ema(down_direction, period=period)
+    relative_strength = emaup / emadn
+    rsi = pd.Series(
+        np.where(emadn == 0, 100, 100 - (100 / (1 + relative_strength))),
+        index=close.index,
+    )
+    return rsi
