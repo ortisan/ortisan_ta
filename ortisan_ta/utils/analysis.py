@@ -46,6 +46,7 @@ def z_score_rolling(mean):
 def array_rolling(arr: np.ndarray):
     return arr.tostring()
 
+
 def rolling_mean_high_over_mean_low(arr):
     mean_low = np.mean(arr[arr < 0]) - 0.0001
     mean_high = np.mean(arr[arr > 0]) + 0.0001
@@ -190,15 +191,47 @@ def aroon(high: pd.Series, low: pd.Series, period: int = 25):
     return pd.DataFrame({"up": aroon_up, "down": aroon_down, "idx": idx_aroon})
 
 
-def rsi(close, period=10):
+def rsi(close: pd.Series, period: int = 10):
     diff = close.diff(1)
     up_direction = diff.where(diff > 0, 0.0)
     down_direction = -diff.where(diff < 0, 0.0)
-    emaup = ema(up_direction, period=period)
-    emadn = ema(down_direction, period=period)
-    relative_strength = emaup / emadn
+    ema_up = ema(up_direction, period=period)
+    ema_dn = ema(down_direction, period=period)
+    relative_strength = ema_up / ema_dn
     rsi = pd.Series(
         np.where(emadn == 0, 100, 100 - (100 / (1 + relative_strength))),
         index=close.index,
     )
     return rsi
+
+def name_candle_sticks(open: pd.Series, close: pd.Series, high: pd.Series, low: pd.Series):
+    diff_hi_low = high/low -1
+    diff_close_open = close/open -1
+    odds_head_tail_and_body = abs(diff_hi_low/diff_close_open)
+    diff_high_close_open = np.abs(high/(np.maximum(close, open))-1)
+    diff_low_close_open = np.abs(low/(np.minimum(close, open))-1)
+    neg = diff_close_open < 0
+    
+    doji = (odds_head_tail_and_body >= 5) & (np.abs(diff_close_open) <= 0.005)    
+    spinning_top = (odds_head_tail_and_body >= 3) & (np.abs(diff_close_open) >= 0.005)
+    marubozu = (np.abs(diff_close_open) >= 0.03) & (odds_head_tail_and_body <= 1.2)
+    hammer = (odds_head_tail_and_body >= 1.5) & ((diff_high_close_open <= 0.005) & (diff_low_close_open >= 0.01))
+    inverted_hammer = (odds_head_tail_and_body >= 1.5) & ((diff_low_close_open <= 0.005) & (diff_high_close_open >= 0.01))
+    named_series = pd.Series(
+        "N/A",
+        index=close.index,
+    )
+    named_series[doji] = "DOJI"
+    named_series[spinning_top] = "SPINNING_TOP"
+    named_series[marubozu] = "MARUBOZU"
+    named_series[hammer] = "HAMMER"
+    named_series[inverted_hammer] = "INVERTED_HAMMER"
+    return named_series
+
+
+
+def get_fibonacci(close: pd.Series):
+    #TODO
+    ema_1 = ema(close, 1)
+    ema_5 = ema(close, 6)
+    ema_20 = ema(close, 20)
