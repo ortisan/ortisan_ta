@@ -210,13 +210,15 @@ def name_candle_sticks(open: pd.Series, close: pd.Series, high: pd.Series, low: 
     odds_head_tail_and_body = abs(diff_hi_low/diff_close_open)
     diff_high_close_open = np.abs(high/(np.maximum(close, open))-1)
     diff_low_close_open = np.abs(low/(np.minimum(close, open))-1)
+    odds_head_tail = (diff_high_close_open/diff_low_close_open)
     neg = diff_close_open < 0
     
-    doji = (odds_head_tail_and_body >= 5) & (np.abs(diff_close_open) <= 0.005)    
-    spinning_top = (odds_head_tail_and_body >= 3) & (np.abs(diff_close_open) >= 0.005)
-    marubozu = (np.abs(diff_close_open) >= 0.03) & (odds_head_tail_and_body <= 1.2)
-    hammer = (odds_head_tail_and_body >= 1.5) & ((diff_high_close_open <= 0.005) & (diff_low_close_open >= 0.01))
-    inverted_hammer = (odds_head_tail_and_body >= 1.5) & ((diff_low_close_open <= 0.005) & (diff_high_close_open >= 0.01))
+    doji = (odds_head_tail_and_body >= 5) & (np.abs(diff_close_open) <= 0.005)
+    spinning_top = (odds_head_tail_and_body >= 1.5) & (np.abs(diff_close_open) >= 0.01) & (np.abs(diff_close_open) <= 0.05) & (odds_head_tail >= 0.5) & (odds_head_tail <= 1.5)
+    marubozu = (np.abs(diff_close_open) >= 0.03) & (odds_head_tail_and_body <= 1.5)
+    hammer = (odds_head_tail_and_body >= 1.5) & ((diff_high_close_open <= 0.005) & (diff_low_close_open >= 0.015))
+    inverted_hammer = (odds_head_tail_and_body >= 1.5) & ((diff_low_close_open <= 0.005) & (diff_high_close_open >= 0.015))
+
     named_series = pd.Series(
         "N/A",
         index=close.index,
