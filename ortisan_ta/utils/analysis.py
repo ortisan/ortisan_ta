@@ -20,7 +20,7 @@ def diff_first_last_rolling(arr: np.ndarray):
 
 
 def pct_first_last_rolling(arr: np.ndarray, absolute_value: bool = False):
-    return arr[-1] / arr[0] - 1
+    return arr[-1] / arr[0]
 
 
 def mean_rolling(arr: np.ndarray):
@@ -75,15 +75,6 @@ def ema(serie: pd.Series, period: int = 10):
 
 
 def bollinger_bands(serie: pd.Series, period=10, std_band=2):
-    """
-    Cria colunas representam a banda inferior VL - X * Desvio Padrão e superior VL + X * Desvio Padrão.
-
-    Keyword arguments:
-    df - Dataframe
-    items - Colunas que serão usadas.
-    periods - Períodos a serem considerados nos cálculos.
-    std_band - Número de desvio padrão a ser considerado nos cálculos
-    """
     sma_val = sma(serie, period)
     std_val = std(serie, period)
 
@@ -94,26 +85,11 @@ def bollinger_bands(serie: pd.Series, period=10, std_band=2):
 
 
 def roc(serie: pd.Series, period: int = 20):
-    """
-    Cria coluna de porcentagem de lucro ou prejuizo.
-    :param df: Dataframe
-    :param item: Item do dataframe utilizado para os cálculos
-    :param period: Período que será utilizado no cálculo
-    :return: pandas.Series com os valores de ROC
-    """
     serie_pct = serie.rolling(period).apply(pct_first_last_rolling, raw=True)
     return serie_pct * 100
 
 
 def trend_roc(serie: pd.Series, period: int = 20, threshold: float = 0.1):
-    """
-    Cria colunas de tendência onde 1 é uma tendência de alta, -1, uma tendência de baixa e 0 não apresentando tendência.
-    :param df: Dataframe
-    :param col: Coluna no dataframe que será utilizada nos cálculos
-    :param period: Lista de períodos
-    :param threshold: Limite que indique uma porcentagem Ex: 0.1, indicará > 10% ou -10%
-    :return: Novo dataframe com colunas roc e trend_roc
-    """
     roc_val = roc(serie, period)
     df = pd.DataFrame({'roc': roc_val})
 
@@ -146,14 +122,6 @@ def macd(close: pd.Series, period1=12, period2=26, signal_line_period=9):
 
 
 def obv(close: pd.Series, volume: pd.Series):
-    """
-    O OBV é um indicador de tendência.
-    Se o valor de fechamento atual é maior que o fechamento anterior, OBV = OBV + VOLUME.
-    Se o valor de fechamento atual é menor que o fechamento anterior, OBV = OBV - VOLUME.
-    Se o valor de fechamento é igual ao fechamento anterior, OBV = OBV
-    :param df: Dataframe
-    :return: Dataframe contendo o OBV df['OBV']
-    """
     diff = close.diff()
     gt0 = diff.gt(0) * 1
     lt0 = diff.lt(0) * 1
@@ -166,12 +134,6 @@ def obv(close: pd.Series, volume: pd.Series):
 
 
 def aroon(high: pd.Series, low: pd.Series, period: int = 25):
-    """
-    O sistema Aroon indica se a ação está em tendência e o quão forte ela é.
-    Keyword arguments:
-    df - Dataframe
-    period - Período.
-    """
     idx_of_max = high.rolling(period, min_periods=period).apply(
         argmax_rolling, raw=True)
     idx_of_min = low.rolling(period, min_periods=period).apply(
@@ -204,20 +166,33 @@ def rsi(close: pd.Series, period: int = 10):
     )
     return rsi
 
+
+def cci(high: pd.Series, low: pd.Series, close: pd.Series, period: int = 10, constant=0.015):   
+    typical_price = (high + low + close)/3
+    std_typical_price = typical_price.std()
+    sma_typical_price = sma(typical_price, period)
+    cci = (typical_price - sma_typical_price)/(std_typical_price * constant)
+    return cci
+
+
 def name_candle_sticks(open: pd.Series, close: pd.Series, high: pd.Series, low: pd.Series):
-    diff_hi_low = high/low -1
-    diff_close_open = close/open -1
+    diff_hi_low = high/low - 1
+    diff_close_open = close/open - 1
     odds_head_tail_and_body = abs(diff_hi_low/diff_close_open)
     diff_high_close_open = np.abs(high/(np.maximum(close, open))-1)
     diff_low_close_open = np.abs(low/(np.minimum(close, open))-1)
     odds_head_tail = (diff_high_close_open/diff_low_close_open)
     neg = diff_close_open < 0
-    
+
     doji = (odds_head_tail_and_body >= 5) & (np.abs(diff_close_open) <= 0.005)
-    spinning_top = (odds_head_tail_and_body >= 1.5) & (np.abs(diff_close_open) >= 0.01) & (np.abs(diff_close_open) <= 0.05) & (odds_head_tail >= 0.5) & (odds_head_tail <= 1.5)
-    marubozu = (np.abs(diff_close_open) >= 0.03) & (odds_head_tail_and_body <= 1.5)
-    hammer = (odds_head_tail_and_body >= 1.5) & ((diff_high_close_open <= 0.005) & (diff_low_close_open >= 0.015))
-    inverted_hammer = (odds_head_tail_and_body >= 1.5) & ((diff_low_close_open <= 0.005) & (diff_high_close_open >= 0.015))
+    spinning_top = (odds_head_tail_and_body >= 1.5) & (np.abs(diff_close_open) >= 0.01) & (
+        np.abs(diff_close_open) <= 0.05) & (odds_head_tail >= 0.5) & (odds_head_tail <= 1.5)
+    marubozu = (np.abs(diff_close_open) >= 0.03) & (
+        odds_head_tail_and_body <= 1.5)
+    hammer = (odds_head_tail_and_body >= 1.5) & (
+        (diff_high_close_open <= 0.005) & (diff_low_close_open >= 0.015))
+    inverted_hammer = (odds_head_tail_and_body >= 1.5) & (
+        (diff_low_close_open <= 0.005) & (diff_high_close_open >= 0.015))
 
     named_series = pd.Series(
         "N/A",
@@ -231,9 +206,8 @@ def name_candle_sticks(open: pd.Series, close: pd.Series, high: pd.Series, low: 
     return named_series
 
 
-
 def get_fibonacci(close: pd.Series):
-    #TODO
+    # TODO
     ema_1 = ema(close, 1)
     ema_5 = ema(close, 6)
     ema_20 = ema(close, 20)
