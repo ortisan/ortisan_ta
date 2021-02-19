@@ -153,6 +153,14 @@ def aroon(high: pd.Series, low: pd.Series, period: int = 25):
     return pd.DataFrame({"up": aroon_up, "down": aroon_down, "idx": idx_aroon})
 
 
+def cci(high: pd.Series, low: pd.Series, close: pd.Series, period: int = 10, constant=0.015):
+    typical_price = (high + low + close)/3
+    std_typical_price = typical_price.std()
+    sma_typical_price = sma(typical_price, period)
+    cci = (typical_price - sma_typical_price)/(std_typical_price * constant)
+    return cci
+
+
 def rsi(close: pd.Series, period: int = 10):
     diff = close.diff(1)
     up_direction = diff.where(diff > 0, 0.0)
@@ -167,14 +175,6 @@ def rsi(close: pd.Series, period: int = 10):
     return rsi
 
 
-def cci(high: pd.Series, low: pd.Series, close: pd.Series, period: int = 10, constant=0.015):   
-    typical_price = (high + low + close)/3
-    std_typical_price = typical_price.std()
-    sma_typical_price = sma(typical_price, period)
-    cci = (typical_price - sma_typical_price)/(std_typical_price * constant)
-    return cci
-
-
 def name_candle_sticks(open: pd.Series, close: pd.Series, high: pd.Series, low: pd.Series):
     diff_hi_low = high/low - 1
     diff_close_open = close/open - 1
@@ -184,15 +184,11 @@ def name_candle_sticks(open: pd.Series, close: pd.Series, high: pd.Series, low: 
     odds_head_tail = (diff_high_close_open/diff_low_close_open)
     neg = diff_close_open < 0
 
-    doji = (odds_head_tail_and_body >= 5) & (np.abs(diff_close_open) <= 0.005)
-    spinning_top = (odds_head_tail_and_body >= 1.5) & (np.abs(diff_close_open) >= 0.01) & (
-        np.abs(diff_close_open) <= 0.05) & (odds_head_tail >= 0.5) & (odds_head_tail <= 1.5)
-    marubozu = (np.abs(diff_close_open) >= 0.03) & (
-        odds_head_tail_and_body <= 1.5)
-    hammer = (odds_head_tail_and_body >= 1.5) & (
-        (diff_high_close_open <= 0.005) & (diff_low_close_open >= 0.015))
-    inverted_hammer = (odds_head_tail_and_body >= 1.5) & (
-        (diff_low_close_open <= 0.005) & (diff_high_close_open >= 0.015))
+    doji = (odds_head_tail_and_body >= 5) & (np.abs(diff_close_open) <= 0.006)
+    spinning_top = (odds_head_tail_and_body >= 1.3) & (np.abs(diff_close_open) >= 0.006) & (np.abs(diff_close_open) <= 0.05) & (odds_head_tail >= 0.5) & (odds_head_tail <= 2)
+    marubozu = (np.abs(diff_close_open) >= 0.03) & (odds_head_tail_and_body <= 1.5)
+    hammer = (odds_head_tail_and_body >= 1.5) & ((diff_high_close_open <= 0.0075) & (diff_low_close_open >= 0.015))
+    inverted_hammer = (odds_head_tail_and_body >= 1.5) & ((diff_low_close_open <= 0.0075) & (diff_high_close_open >= 0.015))
 
     named_series = pd.Series(
         "N/A",
