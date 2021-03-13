@@ -11,7 +11,7 @@ setup(
     license='',
     author='Marcelo Ortiz de Santana',
     author_email='tentativafc@gmail.com',
-    description='This package contains a trade system by Marcelo. In development.',
+    description='This package contains a trade analytic tools by Marcelo. In development...',
     long_description=long_description,
     install_requires=[
      'MetaTrader5 >= 5.0.33',
