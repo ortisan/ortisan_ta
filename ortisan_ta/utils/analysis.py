@@ -84,6 +84,9 @@ def bollinger_bands(serie: pd.Series, period=10, std_band=2):
     return pd.DataFrame({'down': value_down, 'up': value_up, 'width': value_width})
 
 
+def log_returns(serie: pd.Series, period=1):
+    return np.log(prices) - np.log(prices.shift(period))
+
 def roc(serie: pd.Series, period: int = 20):
     serie_pct = serie.rolling(period).apply(pct_first_last_rolling, raw=True)
     return serie_pct * 100
