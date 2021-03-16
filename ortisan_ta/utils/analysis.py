@@ -22,7 +22,7 @@ def diff_first_last_rolling(arr: np.ndarray):
 def diff_first_last_rolling(arr: np.ndarray):
     return arr[-1] - arr[0]
 
-def rolling_sum_abs_diffs(arr):
+def rolling_sum_abs_diffs(arr: np.ndarray):
     return arr.diff().abs().sum()
 
 def mean_rolling(arr: np.ndarray):
@@ -95,7 +95,7 @@ def roc(serie: pd.Series, period: int = 20):
     serie_pct = serie.rolling(period).apply(pct_first_last_rolling, raw=True)
     return serie_pct * 100
 
-def efficiency_ratio(close: pd.Series, period=10):
+def efficiency_ratio(close: pd.Series, period: int=10):
     """
     Measure noise of values. Noise is the fluctuation of prices.
     :param close: Close prices
@@ -104,7 +104,7 @@ def efficiency_ratio(close: pd.Series, period=10):
     """
     net_change = close.rolling(window=period).apply(diff_first_last_rolling).abs()
     abs_change_prices = close.rolling(window=period).apply(rolling_sum_abs_diffs)
-    return net_change/abs_change_prices
+    return net_change / abs_change_prices
 
 def trend_roc(serie: pd.Series, period: int = 20, threshold: float = 0.1):
     roc_val = roc(serie, period)
