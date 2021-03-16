@@ -3,7 +3,8 @@ __author__ = 'Marcelo Ortiz'
 
 import numpy as np
 import pandas as pd
-
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
 
 def argmax_rolling(arr: np.ndarray):
     idx_max = np.argwhere(arr == np.amax(arr))
@@ -83,9 +84,17 @@ def bollinger_bands(serie: pd.Series, period=10, std_band=2):
     value_width = value_up - value_down
     return pd.DataFrame({'down': value_down, 'up': value_up, 'width': value_width})
 
-
 def log_returns(serie: pd.Series, period=1):
     return np.log(prices) - np.log(prices.shift(period))
+
+def hedge_ratio_price_ratio(serie_a: pd.Series, serie_b: pd.Series):
+    return (serie_b / serie_a).mean()
+
+def hedge_ratio_regression(serie_a: pd.Series, serie_b: pd.Series, test_size: float = .8):
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=42)
+    lr = LinearRegression()
+    lr.fit(xVar, yVar)
+
 
 def roc(serie: pd.Series, period: int = 20):
     serie_pct = serie.rolling(period).apply(pct_first_last_rolling, raw=True)
