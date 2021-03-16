@@ -19,10 +19,11 @@ def argmin_rolling(arr: np.ndarray):
 def diff_first_last_rolling(arr: np.ndarray):
     return arr[-1] - arr[0]
 
+def diff_first_last_rolling(arr: np.ndarray):
+    return arr[-1] - arr[0]
 
-def pct_first_last_rolling(arr: np.ndarray, absolute_value: bool = False):
-    return arr[-1] / arr[0]
-
+def rolling_sum_abs_diffs(arr):
+    return arr.diff().abs().sum()
 
 def mean_rolling(arr: np.ndarray):
     return np.mean(arr)
@@ -90,16 +91,20 @@ def log_returns(serie: pd.Series, period=1):
 def hedge_ratio_price_ratio(serie_a: pd.Series, serie_b: pd.Series):
     return (serie_b / serie_a).mean()
 
-def hedge_ratio_regression(serie_a: pd.Series, serie_b: pd.Series, test_size: float = .8):
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=42)
-    lr = LinearRegression()
-    lr.fit(xVar, yVar)
-
-
 def roc(serie: pd.Series, period: int = 20):
     serie_pct = serie.rolling(period).apply(pct_first_last_rolling, raw=True)
     return serie_pct * 100
 
+def efficiency_ratio(close: pd.Series, period=10):
+    """
+    Measure noise of values. Noise is the fluctuation of prices.
+    :param close: Close prices
+    :param period: Number of periods to measure
+    :return: High value indicates lower noise (abs_change_prices lower than net_change).
+    """
+    net_change = close.rolling(window=period).apply(diff_first_last_rolling).abs()
+    abs_change_prices = close.rolling(window=period).apply(rolling_sum_abs_diffs)
+    return net_change/abs_change_prices
 
 def trend_roc(serie: pd.Series, period: int = 20, threshold: float = 0.1):
     roc_val = roc(serie, period)
