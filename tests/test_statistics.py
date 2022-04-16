@@ -1,27 +1,29 @@
-from datetime import datetime
-
+import numpy as np
 import pandas as pd
 from pandas.testing import assert_index_equal
 
-from ortisan_ta.util import date
+from ortisan_ta.statistics import is_normal, is_normal_ks
 
 
-def test_get_dates():
-    initial_date = datetime.strptime("15/04/2022 00:01", "%d/%m/%Y %H:%M")
-    final_date = datetime.strptime("18/04/2022 00:01", "%d/%m/%Y %H:%M")
-    dates = date.get_dates(
-        initial_date=initial_date, final_date=final_date, remove_weekend=False
-    )
-    expected = pd.date_range(initial_date, periods=4, freq="d")
-    assert_index_equal(expected, dates)
+def test_is_normal():
+    mu, sigma = 0, 0.05  # mean and standard deviation
+    s = pd.Series(np.random.normal(mu, sigma, size=1000))
+    result = is_normal(s)
+    assert result
+
+    mu, sigma = 0, 0.05  # mean and standard deviation
+    s = pd.Series(np.random.uniform(size=1000))
+    result = is_normal(s)
+    assert not result
 
 
-def test_get_dates_weekend_removed():
-    initial_date = datetime.strptime("15/04/2022 00:01", "%d/%m/%Y %H:%M")
-    final_date = datetime.strptime("18/04/2022 00:01", "%d/%m/%Y %H:%M")
-    dates = date.get_dates(
-        initial_date=initial_date, final_date=final_date, remove_weekend=True
-    )
-    expected = pd.date_range(initial_date, periods=4, freq="d")
-    assert expected[0] == dates[0]
-    assert expected[-1] == dates[1]
+def test_is_normal_ks():
+    mu, sigma = 0, 0.05  # mean and standard deviation
+    s = pd.Series(np.random.normal(mu, sigma, size=1000))
+    result = is_normal_ks(s)
+    assert result
+
+    mu, sigma = 0, 0.05  # mean and standard deviation
+    s = pd.Series(np.random.uniform(size=1000))
+    result = is_normal_ks(s)
+    assert not result

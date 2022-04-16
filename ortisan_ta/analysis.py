@@ -113,10 +113,8 @@ def efficiency_ratio(close: pd.Series, period: int = 10):
     :param period: Number of periods to measure
     :return: High value indicates lower noise (abs_change_prices lower than net_change).
     """
-    net_change = close.rolling(window=period).apply(
-        diff_first_last_rolling).abs()
-    abs_change_prices = close.rolling(
-        window=period).apply(rolling_sum_abs_diffs)
+    net_change = close.rolling(window=period).apply(diff_first_last_rolling).abs()
+    abs_change_prices = close.rolling(window=period).apply(rolling_sum_abs_diffs)
     return net_change / abs_change_prices
 
 
@@ -176,8 +174,7 @@ def aroon(high: pd.Series, low: pd.Series, period: int = 25):
     idx_of_max = high.rolling(period, min_periods=period).apply(
         argmax_rolling, raw=True
     )
-    idx_of_min = low.rolling(period, min_periods=period).apply(
-        argmin_rolling, raw=True)
+    idx_of_min = low.rolling(period, min_periods=period).apply(argmin_rolling, raw=True)
     # Interpretação:
     #     Se o índice aroon_up cair abaixo de 50 (máxima está abaixo da mediana), a tendência perdeu força. Isso vale o mesmo para o aroon_down
     #     Se o índice aroon_up estiver acima de 70 (máxima está acima do quartil 3), a tendência está forte. Isso vale o mesmo para o aroon_down
