@@ -17,13 +17,6 @@
 
 ### Dev Environment
 
-Environment
-
-  ```sh
-  # Create environment
-  conda create -n ortisan-ta python=3.8.0
-  conda activate ortisan-ta
-  ```
 
 Tests and coverage
 
@@ -41,7 +34,7 @@ Tox
   tox
   ```
 
-Dev instalation
+Dev instalati'http://localhost:8000/prices?symbol=WINQ22&timeframe=TIMEFRAME_M1&initial_date=2022-07-28%2000%3A00%3A00.001&final_date=2022-07-30%2023%3A59%3A59.999on
 
   ```sh
   # Install
@@ -54,5 +47,5 @@ Check [notebooks](https://github.com/ortisan/ortisan_ta/tree/master/notebooks) w
 
   ```sh
   # Install
-  jupyter notebook notebooks
+  poetry run jupyter notebook notebooks
   ```
