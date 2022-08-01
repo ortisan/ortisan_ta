@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-from pandas.testing import assert_index_equal
 
 from ortisan_ta.statistics import is_normal, is_normal_ks
 

@@ -190,6 +190,15 @@ def aroon(high: pd.Series, low: pd.Series, period: int = 25):
     return pd.DataFrame({"up": aroon_up, "down": aroon_down, "idx": idx_aroon})
 
 
+def keltner_bands(olhc_df: pd.Dataframe, period: int = 10, deviation: float = 2.5):
+    atr = talib.ATR(olhc_df.High, olhc_df.Low, olhc_df.Close, timeperiod=period)
+    ema = talib.EMA(olhc_df.Close, timeperiod=period)
+    upperband = ema + deviation * atr
+    lowerband = ema - deviation * atr
+    middleband = ema
+    return (upperband, middleband, lowerband)
+
+
 def cci(
     high: pd.Series, low: pd.Series, close: pd.Series, period: int = 10, constant=0.015
 ):
@@ -216,3 +225,34 @@ def rsi(close: pd.Series, period: int = 10):
 
 def get_slope(serie: pd.Series, period: int = 10):
     return serie.rolling(period, min_periods=period).apply(slope_rolling)
+
+
+def _is_support(low: pd.Series, i: int):
+    return (
+        low[i] < low[i - 1]
+        and low[i] < low[i + 1]
+        and low[i + 1] < low[i + 2]
+        and low[i - 1] < low[i - 2]
+    )
+
+
+def _is_resistance(high: pd.Series, i):
+    return (
+        high[i] > high[i - 1]
+        and high[i] > high[i + 1]
+        and high[i + 1] > high[i + 2]
+        and high[i - 1] > high[i - 2]
+    )
+
+
+def get_supports_and_resistances(olhc_df: pd.DataFrame):
+    supports, resistances = ([], [])
+    low = olhc_df.Low
+    high = olhc_df.High
+    for i in range(2, olhc_df.shape[0] - 2):
+        if _is_support(low, i):
+            supports.append((i, low[i]))
+        elif _is_resistance(high, i):
+            resistances.append((i, high[i]))
+
+    return (supports, resistances)

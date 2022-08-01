@@ -17,13 +17,16 @@
 
 ### Dev Environment
 
-
-Tests and coverage
+Commands
 
   ```sh
-  # Run tests
-  poetry run pytest
-  # Run coverage
+  # Install dependencies
+  poetry add <dependency name>
+  # Activate Env
+  poetry shell
+  # Organize imports and format code
+  poetry run autoflake --expand-star-imports --remove-all-unused-imports --remove-duplicate-keys --remove-unused-variables --recursive --in-place .  && poetry run isort . && poetry run black .
+  # Test
   poetry run coverage run -m pytest && poetry run coverage report -m
   ```
 
@@ -34,7 +37,7 @@ Tox
   tox
   ```
 
-Dev instalati'http://localhost:8000/prices?symbol=WINQ22&timeframe=TIMEFRAME_M1&initial_date=2022-07-28%2000%3A00%3A00.001&final_date=2022-07-30%2023%3A59%3A59.999on
+Dev installation
 
   ```sh
   # Install
