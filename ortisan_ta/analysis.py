@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import talib
 from scipy.stats import linregress
 
 
@@ -190,9 +191,15 @@ def aroon(high: pd.Series, low: pd.Series, period: int = 25):
     return pd.DataFrame({"up": aroon_up, "down": aroon_down, "idx": idx_aroon})
 
 
-def keltner_bands(olhc_df: pd.Dataframe, period: int = 10, deviation: float = 2.5):
-    atr = talib.ATR(olhc_df.High, olhc_df.Low, olhc_df.Close, timeperiod=period)
-    ema = talib.EMA(olhc_df.Close, timeperiod=period)
+def keltner_bands(
+    high: pd.Series,
+    low: pd.Series,
+    close: pd.Series,
+    period: int = 10,
+    deviation: float = 2.5,
+):
+    atr = talib.ATR(high, low, close, timeperiod=period)
+    ema = talib.EMA(close, timeperiod=period)
     upperband = ema + deviation * atr
     lowerband = ema - deviation * atr
     middleband = ema
@@ -236,7 +243,7 @@ def _is_support(low: pd.Series, i: int):
     )
 
 
-def _is_resistance(high: pd.Series, i):
+def _is_resistance(high: pd.Series, i: int):
     return (
         high[i] > high[i - 1]
         and high[i] > high[i + 1]

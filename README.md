@@ -24,6 +24,8 @@ Commands
   poetry add <dependency name>
   # Activate Env
   poetry shell
+  # Install module
+  poetry install
   # Organize imports and format code
   poetry run autoflake --expand-star-imports --remove-all-unused-imports --remove-duplicate-keys --remove-unused-variables --recursive --in-place .  && poetry run isort . && poetry run black .
   # Test
