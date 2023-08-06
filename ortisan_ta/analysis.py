@@ -89,13 +89,12 @@ def bollinger_bands(serie: pd.Series, period=10, std_band=2):
 
 
 def log_returns(serie: pd.Series, period=1):
-    return np.log(serie) - np.log(serie.shift(period))
+    return np.log(serie / serie.shift(period))
 
 
 def cumulative_log_returns(serie: pd.Series, period=1):
     lr = log_returns(serie, period)
-    cum_clr = lr.cumsum()[-1]
-    return np.exp(cum_clr) - 1
+    return lr.cumsum()
 
 
 def hedge_ratio_price_ratio(serie_a: pd.Series, serie_b: pd.Series):
@@ -263,3 +262,23 @@ def get_supports_and_resistances(olhc_df: pd.DataFrame):
             resistances.append((i, high[i]))
 
     return (supports, resistances)
+
+
+def crossover_by_value(series: pd.Series, value: float):
+    return (series.shift(1) < value) & (series > value)
+
+
+def crossbelow_by_value(series: pd.Series, value: float):
+    return (series.shift(1) > value) & (series < value)
+
+
+def cross_by_value(series: pd.Series, value: float):
+    return crossover_by_value(series, value) | crossbelow_by_value(series, value)
+
+
+def crossover(series1: pd.Series, series2: pd.Series):
+    return (series1.shift(1) < series2.shift(1)) & (series1 > series2)
+
+
+def cross(series1: pd.Series, series2: pd.Series):
+    return crossover(series1, series2) | (series2, series1)

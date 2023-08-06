@@ -1,5 +1,40 @@
 import numpy as np
 import pandas as pd
+import talib
+
+
+def name_candlesticks(
+    open: pd.Series, high: pd.Series, low: pd.Series, close: pd.Series
+):
+    dojis = talib.CDLDOJI(open, high, low, close)
+    doji_stars = talib.CDLDOJISTAR(open, high, low, close)
+    dragonfly_dojis = talib.CDLDRAGONFLYDOJI(open, high, low, close)
+    marubozus = talib.CDLMARUBOZU(open, high, low, close)
+    hammers = talib.CDLHAMMER(open, high, low, close)
+    inverted_hammers = talib.CDLINVERTEDHAMMER(open, high, low, close)
+    gravestone_dojis = talib.CDLGRAVESTONEDOJI(open, high, low, close)
+    longlegged_dojis = talib.CDLLONGLEGGEDDOJI(open, high, low, close)
+    longlines = talib.CDLLONGLINE(open, high, low, close)
+    spinning_tops = tablib.CDLSPINNINGTOP(open, high, low, close)
+    takuris = talib.CDLTAKURI(open, high, low, close)
+
+    named_series = pd.Series(
+        "None",
+        index=close.index,
+    )
+    named_series[dojis] = "doji"
+    named_series[doji_stars] = "doji_star"
+    named_series[dragonfly_dojis] = "dragonfly_doji"
+    named_series[marubozus] = "marubozu"
+    named_series[hammers] = "hammer"
+    named_series[inverted_hammers] = "inverted_hammer"
+    named_series[gravestone_dojis] = "gravestone_doji"
+    named_series[longlegged_dojis] = "longlegged_doji"
+    named_series[longlines] = "longline"
+    named_series[spinning_tops] = "spinning_top"
+    named_series[takuris] = "takuri"
+
+    return named_series
 
 
 def body_length(open: pd.Series, close: pd.Series):
@@ -198,7 +233,7 @@ def is_bearish_kicker(open: pd.Series, close: pd.Series):
     )
 
 
-def name_candlesticks(
+def name_candlesticks_old(
     open: pd.Series, close: pd.Series, high: pd.Series, low: pd.Series
 ):
     diff_hi_low = high / low - 1
