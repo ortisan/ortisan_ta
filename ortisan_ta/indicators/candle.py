@@ -4,7 +4,10 @@ import talib
 
 
 def name_candlesticks(
-    open: pd.Series, high: pd.Series, low: pd.Series, close: pd.Series
+    open: pd.Series[float],
+    high: pd.Series[float],
+    low: pd.Series[float],
+    close: pd.Series[float],
 ):
     dojis = talib.CDLDOJI(open, high, low, close)
     doji_stars = talib.CDLDOJISTAR(open, high, low, close)
@@ -15,10 +18,10 @@ def name_candlesticks(
     gravestone_dojis = talib.CDLGRAVESTONEDOJI(open, high, low, close)
     longlegged_dojis = talib.CDLLONGLEGGEDDOJI(open, high, low, close)
     longlines = talib.CDLLONGLINE(open, high, low, close)
-    spinning_tops = tablib.CDLSPINNINGTOP(open, high, low, close)
+    spinning_tops = talib.CDLSPINNINGTOP(open, high, low, close)
     takuris = talib.CDLTAKURI(open, high, low, close)
 
-    named_series = pd.Series(
+    named_series = pd.Series[float](
         "None",
         index=close.index,
     )
@@ -37,27 +40,36 @@ def name_candlesticks(
     return named_series
 
 
-def body_length(open: pd.Series, close: pd.Series):
+def body_length(open: pd.Series[float], close: pd.Series[float]) -> pd.Series[float]:
     return np.abs(open - close)
 
 
-def wick_length(open: pd.Series, close: pd.Series, high: pd.Series):
+def wick_length(
+    open: pd.Series[float], close: pd.Series[float], high: pd.Series[float]
+) -> pd.Series[float]:
     return high - np.maximum(open, close)
 
 
-def tail_length(open: pd.Series, close: pd.Series, low: pd.Series):
+def tail_length(
+    open: pd.Series[float], close: pd.Series[float], low: pd.Series[float]
+) -> pd.Series[float]:
     return np.minimum(open, close) - low
 
 
-def is_bullish(open: pd.Series, close: pd.Series):
+def is_bullish(open: pd.Series[float], close: pd.Series[float]) -> pd.Series[float]:
     return open < close
 
 
-def is_bearish(open: pd.Series, close: pd.Series):
+def is_bearish(open: pd.Series[float], close: pd.Series[float]) -> pd.Series[float]:
     return open > close
 
 
-def is_hammer_like(open: pd.Series, close: pd.Series, high: pd.Series, low: pd.Series):
+def is_hammer_like(
+    open: pd.Series[float],
+    close: pd.Series[float],
+    high: pd.Series[float],
+    low: pd.Series[float],
+) -> pd.Series[bool]:
     bl = body_length(open=open, close=close)
     return (tail_length(open=open, close=close, low=low) > (bl * 2)) & (
         wick_length(open=open, close=close, high=high) < bl
@@ -65,8 +77,11 @@ def is_hammer_like(open: pd.Series, close: pd.Series, high: pd.Series, low: pd.S
 
 
 def is_inverted_hammer_like(
-    open: pd.Series, close: pd.Series, high: pd.Series, low: pd.Series
-):
+    open: pd.Series[float],
+    close: pd.Series[float],
+    high: pd.Series[float],
+    low: pd.Series[float],
+) -> pd.Series[bool]:
     bl = body_length(open=open, close=close)
     return (wick_length(open=open, close=close, high=high) > (bl * 2)) & (
         tail_length(open=open, close=close, low=low) < bl
@@ -74,26 +89,26 @@ def is_inverted_hammer_like(
 
 
 def is_engulfed(
-    shortest_open: pd.Series,
-    shortest_close: pd.Series,
-    longest_open: pd.Series,
-    longest_close: pd.Series,
-):
+    shortest_open: pd.Series[float],
+    shortest_close: pd.Series[float],
+    longest_open: pd.Series[float],
+    longest_close: pd.Series[float],
+) -> pd.Series[bool]:
     return body_length(open=shortest_open, close=shortest_close) < body_length(
         open=longest_open, close=longest_close
     )
 
 
 def is_gap(
-    lowest_open: pd.Series,
-    lowest_close: pd.Series,
-    upmost_open: pd.Series,
-    upmost_close: pd.Series,
-):
+    lowest_open: pd.Series[float],
+    lowest_close: pd.Series[float],
+    upmost_open: pd.Series[float],
+    upmost_close: pd.Series[float],
+) -> pd.Series[bool]:
     return np.maximum(lowest_open, lowest_close) < np.minimum(upmost_open, upmost_close)
 
 
-def is_gap_up(open: pd.Series, close: pd.Series):
+def is_gap_up(open: pd.Series[float], close: pd.Series[float]) -> pd.Series[bool]:
     open_previous = open.shift(1)
     close_previous = close.shift(1)
     return is_gap(
@@ -104,7 +119,7 @@ def is_gap_up(open: pd.Series, close: pd.Series):
     )
 
 
-def is_gap_down(open: pd.Series, close: pd.Series):
+def is_gap_down(open: pd.Series[float], close: pd.Series[float]) -> pd.Series[bool]:
     open_previous = open.shift(1)
     close_previous = close.shift(1)
     return is_gap(
@@ -115,21 +130,34 @@ def is_gap_down(open: pd.Series, close: pd.Series):
     )
 
 
-def is_hammer(open: pd.Series, close: pd.Series, high: pd.Series, low: pd.Series):
+def is_hammer(
+    open: pd.Series[float],
+    close: pd.Series[float],
+    high: pd.Series[float],
+    low: pd.Series[float],
+) -> pd.Series[bool]:
     return is_bullish(open=open, close=close) & is_hammer_like(
         open=open, close=close, high=high, low=low
     )
 
 
 def is_inverted_hammer(
-    open: pd.Series, close: pd.Series, high: pd.Series, low: pd.Series
-):
+    open: pd.Series[float],
+    close: pd.Series[float],
+    high: pd.Series[float],
+    low: pd.Series[float],
+) -> pd.Series[bool]:
     return is_bearish(open=open, close=close) & is_inverted_hammer_like(
         open=open, close=close, high=high, low=low
     )
 
 
-def is_hanging_man(open: pd.Series, close: pd.Series, high: pd.Series, low: pd.Series):
+def is_hanging_man(
+    open: pd.Series[float],
+    close: pd.Series[float],
+    high: pd.Series[float],
+    low: pd.Series[float],
+) -> pd.Series[bool]:
     open_previous = open.shift(1)
     close_previous = close.shift(1)
     return (
@@ -141,8 +169,11 @@ def is_hanging_man(open: pd.Series, close: pd.Series, high: pd.Series, low: pd.S
 
 
 def is_shooting_star(
-    open: pd.Series, close: pd.Series, high: pd.Series, low: pd.Series
-):
+    open: pd.Series[float],
+    close: pd.Series[float],
+    high: pd.Series[float],
+    low: pd.Series[float],
+) -> pd.Series[bool]:
     open_previous = open.shift(1)
     close_previous = close.shift(1)
     return (
@@ -153,7 +184,9 @@ def is_shooting_star(
     )
 
 
-def is_bullish_engulfing(open: pd.Series, close: pd.Series):
+def is_bullish_engulfing(
+    open: pd.Series[float], close: pd.Series[float]
+) -> pd.Series[bool]:
     open_previous = open.shift(1)
     close_previous = close.shift(1)
     return (
@@ -168,7 +201,9 @@ def is_bullish_engulfing(open: pd.Series, close: pd.Series):
     )
 
 
-def is_bearish_engulfing(open: pd.Series, close: pd.Series):
+def is_bearish_engulfing(
+    open: pd.Series[float], close: pd.Series[float]
+) -> pd.Series[bool]:
     open_previous = open.shift(1)
     close_previous = close.shift(1)
     return (
@@ -183,7 +218,9 @@ def is_bearish_engulfing(open: pd.Series, close: pd.Series):
     )
 
 
-def is_bullish_harami(open: pd.Series, close: pd.Series):
+def is_bullish_harami(
+    open: pd.Series[float], close: pd.Series[float]
+) -> pd.Series[bool]:
     open_previous = open.shift(1)
     close_previous = close.shift(1)
     return (
@@ -198,7 +235,7 @@ def is_bullish_harami(open: pd.Series, close: pd.Series):
     )
 
 
-def isBearishHarami(open: pd.Series, close: pd.Series):
+def isBearishHarami(open: pd.Series[float], close: pd.Series[float]) -> pd.Series[bool]:
     open_previous = open.shift(1)
     close_previous = close.shift(1)
     return (
@@ -213,7 +250,9 @@ def isBearishHarami(open: pd.Series, close: pd.Series):
     )
 
 
-def is_bullish_kicker(open: pd.Series, close: pd.Series):
+def is_bullish_kicker(
+    open: pd.Series[float], close: pd.Series[float]
+) -> pd.Series[bool]:
     open_previous = open.shift(1)
     close_previous = close.shift(1)
     return (
@@ -223,7 +262,9 @@ def is_bullish_kicker(open: pd.Series, close: pd.Series):
     )
 
 
-def is_bearish_kicker(open: pd.Series, close: pd.Series):
+def is_bearish_kicker(
+    open: pd.Series[float], close: pd.Series[float]
+) -> pd.Series[bool]:
     open_previous = open.shift(1)
     close_previous = close.shift(1)
     return (
@@ -234,8 +275,11 @@ def is_bearish_kicker(open: pd.Series, close: pd.Series):
 
 
 def name_candlesticks_old(
-    open: pd.Series, close: pd.Series, high: pd.Series, low: pd.Series
-):
+    open: pd.Series[float],
+    close: pd.Series[float],
+    high: pd.Series[float],
+    low: pd.Series[float],
+) -> pd.Series[str]:
     diff_hi_low = high / low - 1
     diff_close_open = close / open - 1
     odds_head_tail_and_body = abs(diff_hi_low / diff_close_open)
@@ -259,7 +303,7 @@ def name_candlesticks_old(
         (diff_low_close_open <= 0.0075) & (diff_high_close_open >= 0.015)
     )
 
-    named_series = pd.Series(
+    named_series = pd.Series[float](
         "N/A",
         index=close.index,
     )

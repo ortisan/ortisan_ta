@@ -1,12 +1,16 @@
 {
-  "include": [
-    "reactivex"
-  ],
   "exclude": [
     "tests"
   ],
-  "reportImportCycles": false,
-  "reportMissingImports": false,
-  "pythonVersion": "3.8",
+  "reportImportCycles": true,
+  "reportMissingParameterType": false,
+  "reportMissingImports": true,
+  //"reportMissingTypeStubs": false,
+  "reportGeneralTypeIssues": false,
+  "reportUnknownVariableType": false,
+  "reportUnknownParameterType": false,
+  "reportUnknownArgumentType": false,
+  "reportUnknownMemberType": false,
+  "pythonVersion": "3.10",
   "typeCheckingMode": "strict"
 }

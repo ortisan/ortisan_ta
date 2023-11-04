@@ -1,11 +1,11 @@
+import matplotlib.dates as mpl_dates
 import matplotlib.pyplot as plt
-import pandas as pd
 import scipy.stats as stats
 from mplfinance import candlestick_ohlc
 from statsmodels.graphics.tsaplots import plot_acf
 
 
-def basic_olhc_plot(olhc_df: pd.Dataframe):
+def basic_olhc_plot(olhc_df):
     fig, ax = plt.subplots()
 
     candlestick_ohlc(
@@ -27,7 +27,7 @@ def basic_olhc_plot(olhc_df: pd.Dataframe):
 
 
 def show_distribution(
-    values: pd.Series,
+    values,
     bins=50,
     title="Boxplot of a Normal Distribution",
     figsize=(16, 9),
@@ -38,11 +38,11 @@ def show_distribution(
     axes[1].hist(values, bins=bins)
 
 
-def show_qqplot(values: pd.Series, figsize=(10, 10)):
+def show_qqplot(values, figsize=(10, 10)):
     plt.figure(figsize=figsize)
     plt.axis("equal")
     stats.probplot(values, dist="norm", plot=plt)
 
 
-def show_autocorrelation(values: pd.Series, lags=10, title="Autocorrelation"):
+def show_autocorrelation(values, lags=10, title="Autocorrelation"):
     plot_acf(values, lags=lags, title=title)

@@ -1,5 +1,6 @@
 from datetime import datetime
 
+import pandas as pd
 from pandas import DataFrame, DatetimeIndex, date_range
 
 
@@ -13,7 +14,7 @@ def get_dates(
     :param remove_weekend: flag to remove weekends
     :return: range of dates
     """
-    dates = date_range(start, stop)
+    dates = date_range(initial_date, final_date)
     if remove_weekend:
         dates = dates[dates.weekday < 5]
     return dates
@@ -38,7 +39,7 @@ def trim_dataframe(
     return df
 
 
-def get_outer_dates(dates_series: pd.Series, freq: str = "1min"):
+def get_outer_dates(dates_series: pd.Series[datetime], freq: str = "1min"):
     """
     Get the outer dates that is not in the range. Utilized by plotly to remove from graphs.
     :param dates_series: Series with dates
